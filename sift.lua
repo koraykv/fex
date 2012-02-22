@@ -1,3 +1,5 @@
+-- SIFT feature extractor as implemented in Svetlana Lazebnik's
+-- Pyramid code.
 
 function gendgauss(sigma)
 
