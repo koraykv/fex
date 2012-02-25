@@ -1,3 +1,5 @@
+
+-- convolutions with 'same' option
 function fex.conv2(...)
     local arg = {...}
     if arg[#arg] == 'S' then
@@ -23,6 +25,8 @@ function fex.conv2(...)
         return torch.conv2(...)
     end
 end
+
+-- cross correlations with 'same' option
 function fex.xcorr2(...)
     local arg = {...}
     if arg[#arg] == 'S' then
@@ -49,6 +53,9 @@ function fex.xcorr2(...)
     end
 end
 
+-- numerical gradient of a tensor.
+-- dim is a number that specifies the tensor dimension to calculate gradient
+-- dim is a tensor of dimension indices
 function fex.gradient(x,dim)
 
     if not dim then dim = torch.range(0,x:dim()):narrow(1,2,x:dim()) end
@@ -125,14 +132,6 @@ function fex.padarray(x,pad,padtype)
     if padtype == 'mirror' then return padmirror(x,pad) end
     error('unknown paddtype ' .. padtype)
 end
-
-
-
-
-
-
-
-
 
 
 
