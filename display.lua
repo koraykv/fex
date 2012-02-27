@@ -27,7 +27,7 @@ function fex.imToDisplay(x,params)
         end
     end
     if x:dim() ~= 4 then error('WTF') end
-    local nfil,nch,w,h = x:size(1),x:size(2),x:size(3),x:size(4)
+    local nfil,nch,h,w = x:size(1),x:size(2),x:size(3),x:size(4)
 
     local xmax = -math.huge
     if params.sym then

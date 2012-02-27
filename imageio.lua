@@ -39,13 +39,33 @@ local function readim(fname,nchannels)
     local ss = io.popen(cmd,'r'):read('*all')
     if #ss > 0 then error(s) end
     local imstor = torch.DiskFile(tmpf,'r'):binary():readByte(w*h*nchannels)
-    local imtens = torch.ByteTensor(imstor):resize(w,h,nchannels)
-    local dimtens = torch.Tensor(nchannels,w,h):copy(imtens)
-    for i=1,nchannels do
-        dimtens[i]:copy(imtens:select(3,i))
-    end
+    local imtens = torch.ByteTensor(imstor):resize(h,w,nchannels):transpose(1,3):transpose(2,3)
+    local dimtens = torch.Tensor(nchannels,h,w):copy(imtens)
     dimtens:div(255)
-    return dimtens:squeeze()
+    if nchannels == 1 then dimtens:resize(h,w) end
+    return dimtens
+end
+
+-- this can write all formats that imagemagick can write
+local function writeim(im,fname)
+    local w,h,nch = im:size(2),im:size(1),im:size(3)
+    local ext
+    if nch == 1 then
+        ext = '.gray'
+    elseif nch == 3 then
+        ext = '.rgb'
+    elseif nch == 4 then
+        ext = '.rgba'
+    else
+        error('Number of channels of an image can be 1 (gray), 3 (rgb) or 4 (rgba)')
+    end
+    local tmpf = os.tmpname() .. ext
+    local imstor = torch.DiskFile(tmpf,'w'):binary()
+    imstor:writeByte(im:storage())
+    imstor:close()
+    local cmd = 'convert -depth 8 -size ' .. w .. 'x' .. h .. ' ' .. tmpf .. ' ' .. fname
+    local ss = io.popen(cmd,'r'):read('*all')
+    if #ss > 0 then error(s) end
 end
 
 function fex.readrgb(fname)
@@ -60,6 +80,15 @@ end
 function fex.imread(fname)
     return readim(fname)
 end
+function fex.imwrite(fname,im)
+    local imc = im:clone()
+    if imc:max() > 1 then imc:div(imc:max()) end
+    imc:mul(255)
+    if imc:dim() == 2 then imc:resize(1,imc:size(1),imc:size(2)) end
+    local imb = imc:byte():transpose(1,3):transpose(1,2):clone()
+    writeim(imb,fname)
+end
+
 local flena = paths.thisfile('lena.png')
 function fex.lena()
     return fex.imread(flena)
