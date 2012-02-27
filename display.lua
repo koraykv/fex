@@ -1,27 +1,42 @@
 
-function fex.filtersToImage(x,nrow)
+function fex.imToDisplay(x,params)
 
-    local nfil = 0
-    if type(x) == 'userdata' and x:dim() == 2 then
-        x={x}
-        nfil = 1
-    end
+    params = params or {}
+    if params.sym == nil then params.sym = false end
+    params.nrow = params.nrow or 8
+
     if type(x) == 'table' then
-        nfil = #x
-    else
-        nfil = x:size(1)
+        local xx = x[1]
+        local sz = torch.LongStorage(4)
+        sz[1] = #x
+        if xx:dim() == 2 then sz[2] = 1 else sz[2] = xx:size(1) end
+        sz[3] = xx:size(xx:dim()-1)
+        sz[4] = xx:size(xx:dim())
+        local xx = torch.Tensor(sz)
+        for i=1,#x do xx[i]:copy(x[i]) end
+        x=xx
     end
-    local w,h = x[1]:size(x[1]:dim()),x[1]:size(x[1]:dim()-1)
+    if x:dim() == 2 then
+        x=torch.Tensor(x):resize(1,x:size(1),x:size(2))
+    end
+    if x:dim() == 3 then
+        if x:size(1) == 3 then
+            x=torch.Tensor(x):resize(1,x:size(1),x:size(2),x:size(3))
+        else
+            x=torch.Tensor(x):resize(x:size(1),1,x:size(2),x:size(3))
+        end
+    end
+    if x:dim() ~= 4 then error('WTF') end
+    local nfil,nch,w,h = x:size(1),x:size(2),x:size(3),x:size(4)
 
     local xmax = -math.huge
-    for i=1,nfil do
-        xmax = math.max(xmax,x[i]:max())
+    if params.sym then
+        xmax = math.max(math.abs(x:max()),math.abs(x:min()))
+    else
+        xmax = x:max()
     end
-    local nch = x[1]:size(1)
-    if x[1]:dim() == 2 then nch = 1 end
 
-    nrow = nrow or 8
-    nrow = math.min(nrow,nfil)
+    local nrow = math.min(params.nrow,nfil)
     local ncol = math.floor(nfil/nrow) + math.min(nfil % nrow, 1)
     local xx = torch.Tensor(nch, ncol * (h+1) + 1 , nrow * (w+1) + 1)
     xx:fill(xmax)
@@ -35,19 +50,34 @@ function fex.filtersToImage(x,nrow)
             if ii>nfil then break end
         end
     end
-    -- [0-1] for display
-    xx:add(-xx:min())
-    xx:div(xx:max())
+    if params.sym then
+        xx:add(xmax)
+        xx:div(2*xmax)
+    else
+        -- [0-1] for display
+        xx:add(-xx:min())
+        xx:div(xx:max())
+    end
     return xx
 end
 
-function fex.display(xx,ww)
+function fex.imshow(im,params)
     require 'qtwidget'
     require 'qttorch'
-    local xmin = xx:min()
+    params = params or {}
+    local xx = fex.imToDisplay(im,params)
     local w,h = xx:size(xx:dim()),xx:size(xx:dim()-1)
-    local ww = ww or qtwidget.newwindow(w,h,'Image Display')
+    local ww = params.ww or qtwidget.newwindow(w,h,'Image Display')
+    local xi = params.x or 0
+    local yi = params.y or 0
     local qim = qt.QImage.fromTensor(xx)
-    ww:image(0,0,qim)
+    local wr,hr = ww:currentsize()
+    local ss = math.min(wr/w,hr/h)
+    local wi,hi = w*ss,h*ss
+    ww:resize(wi,hi)
+    ww:image(xi,yi,wi,hi,qim)
+    ww:onResize(function(w,h) ww:image(xi,yi,w,h,qim) end)
     return ww
 end
+
+

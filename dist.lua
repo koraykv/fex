@@ -26,3 +26,16 @@ function fex.normpdf(x,mean,std)
 	pdf:div(std)
 	return pdf
 end
+
+function fex.gendgauss(sigma)
+
+    --Laplacian of size sigma
+    local f_wid = 2 * math.floor(sigma) ;
+    local G = fex.normpdf(torch.range(-f_wid,f_wid),0,sigma);
+    G = torch.ger(G,G)
+    GX,GY = fex.gradient(G);
+
+    GX:div(torch.sum(torch.abs(GX))):mul(2)
+    GY:div(torch.sum(torch.abs(GY))):mul(2)
+    return GX, GY
+end
