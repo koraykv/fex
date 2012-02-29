@@ -14,8 +14,8 @@ function fex.conv2(...)
             ro = x.new(x:size())
         end
         local r = torch.conv2(x,k,'F')
-        local shifti = math.max(1,math.floor((r:size(1)-x:size(1))/2))
-        local shiftj = math.max(1,math.floor((r:size(2)-x:size(2))/2))
+        local shifti = 1+math.ceil((r:size(1)-x:size(1))/2)
+        local shiftj = 1+math.ceil((r:size(2)-x:size(2))/2)
         local ii = r:dim()-1
         local jj = r:dim()
         ro:resizeAs(x)
@@ -41,8 +41,8 @@ function fex.xcorr2(...)
             ro = x.new(x:size())
         end
         local r = torch.xcorr2(x,k,'F')
-        local shifti = math.floor((r:size(1)-x:size(1))/2)
-        local shiftj = math.floor((r:size(2)-x:size(2))/2)
+        local shifti = 1+math.ceil((r:size(1)-x:size(1))/2)
+        local shiftj = 1+math.ceil((r:size(2)-x:size(2))/2)
         local ii = r:dim()-1
         local jj = r:dim()
         ro:resizeAs(x)

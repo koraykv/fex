@@ -65,18 +65,22 @@ function fex.imshow(im,params)
     require 'qtwidget'
     require 'qttorch'
     params = params or {}
-    local xx = fex.imToDisplay(im,params)
+    local title = params.title or "Image Display"
+    local xx = fex.imToDisplay(im:clone(),params)
     local w,h = xx:size(xx:dim()),xx:size(xx:dim()-1)
-    local ww = params.ww or qtwidget.newwindow(w,h,'Image Display')
+    local ww = params.win or qtwidget.newwindow(w,h,title)
     local xi = params.x or 0
     local yi = params.y or 0
     local qim = qt.QImage.fromTensor(xx)
-    local wr,hr = ww:currentsize()
-    local ss = math.min(wr/w,hr/h)
-    local wi,hi = w*ss,h*ss
-    ww:resize(wi,hi)
+    if params.win == nil then
+        local wr,hr = ww:currentsize()
+        local ss = math.min(wr/w,hr/h)
+        local wi,hi = w*ss,h*ss
+        ww:resize(wi,hi)
+        ww:onResize(function(w,h) ww:image(xi,yi,w,h,qim) end)
+    end
+    ww.widget.windowTitle = title
     ww:image(xi,yi,wi,hi,qim)
-    ww:onResize(function(w,h) ww:image(xi,yi,w,h,qim) end)
     return ww
 end
 
