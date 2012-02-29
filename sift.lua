@@ -8,7 +8,7 @@ end
 -- patch_size is the region over which the SIFT feature is computed
 -- grid_spacing is the step size between each patch
 -- num_bins is the 
-function sift_sampler(io,patch_size,grid_spacing,num_bins)
+local function sift_sampler(io,patch_size,grid_spacing,num_bins)
     local num_angles = io:size(1)
     local binstep = math.floor(patch_size/num_bins)
     local nr,nor = csize(io:size(2),patch_size,grid_spacing)
