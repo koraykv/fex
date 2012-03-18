@@ -28,6 +28,25 @@ local function sift_sampler(io,patch_size,grid_spacing,num_bins)
     return sift
 end
 
+local function sift_normalize(sift)
+    error('not yet implemented')
+end
+local function sift_normalize_dense(sift)
+    local ct = .1;
+    torch.add(sift,sift,ct)
+    local tmp = torch.cmul(sift,sift)
+    local tmp2 = torch.sum(tmp,1)
+    torch.sqrt(tmp2,tmp2)
+    -- print(tmp2[{ 1 , {1,10} , {1,10} }])
+    local rtmp2 = torch.Tensor(tmp2:storage(),tmp2:storageOffset(),
+                               sift:size(1),0,tmp2:size(2),tmp2:stride(2),tmp2:size(3),tmp2:stride(3))
+
+    -- print(rtmp2:size())
+    torch.cdiv(sift,sift,rtmp2)
+    return sift
+end
+
+
 -- SIFT feature extractor as implemented in Svetlana Lazebnik's
 -- Pyramid code.
 function fex.dsift(im, params)
@@ -126,9 +145,10 @@ function fex.dsift(im, params)
     if fex.verbose then print('6',torch.toc(t)) end
 
     local sift=sift_sampler(I_orientation2,patch_size,grid_spacing,num_bins)
-
-    collectgarbage()
     if fex.verbose then print('7',torch.toc(t)) end
+    sift = sift_normalize_dense(sift)
+    collectgarbage()
+    if fex.verbose then print('8',torch.toc(t)) end
     return sift
 end
 
@@ -221,8 +241,10 @@ function fex.dsiftfast(im, params)
     end
     if fex.verbose then print('6',torch.toc(t)) end
     local sift=sift_sampler(I_orientation2,patch_size,grid_spacing,num_bins)
-    collectgarbage()
     if fex.verbose then print('7',torch.toc(t)) end
+    sift = sift_normalize_dense(sift)
+    collectgarbage()
+    if fex.verbose then print('8',torch.toc(t)) end
     return sift
 end
 

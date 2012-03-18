@@ -67,16 +67,16 @@ function fex.imshow(im,params)
     params = params or {}
     local title = params.title or "Image Display"
     local xx = fex.imToDisplay(im:clone(),params)
-    local w,h = xx:size(xx:dim()),xx:size(xx:dim()-1)
-    local ww = params.win or qtwidget.newwindow(w,h,title)
+    local wi,hi = xx:size(xx:dim()),xx:size(xx:dim()-1)
+    local ww = params.win or qtwidget.newwindow(wi,hi,title)
     local xi = params.x or 0
     local yi = params.y or 0
     local qim = qt.QImage.fromTensor(xx)
     if params.win == nil then
         local wr,hr = ww:currentsize()
-        local ss = math.min(wr/w,hr/h)
-        local wi,hi = w*ss,h*ss
-        ww:resize(wi,hi)
+        local ss = math.min(wr/wi,hr/hi)
+        local wis,his = wi*ss,hi*ss
+        ww:resize(wis,his)
         ww:onResize(function(w,h) ww:image(xi,yi,w,h,qim) end)
     end
     ww.widget.windowTitle = title

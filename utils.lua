@@ -54,12 +54,10 @@ function fex.xcorr2(...)
 end
 
 -- numerical gradient of a tensor.
--- dim is a number that specifies the tensor dimension to calculate gradient
--- dim is a tensor of dimension indices
-function fex.gradient(x,dim)
+function fex.gradient(x)
 
-    if not dim then dim = torch.range(0,x:dim()):narrow(1,2,x:dim()) end
-    if type(dim) == 'number' then dim = torch.Tensor({dim}) end
+    -- if not dim then dim = torch.range(0,x:dim()):narrow(1,2,x:dim()) end
+    -- if type(dim) == 'number' then dim = torch.Tensor({dim}) end
     local ndim = x:dim()
 
     local function grad(x,dim)
@@ -133,6 +131,15 @@ function fex.padarray(x,pad,padtype)
     error('unknown paddtype ' .. padtype)
 end
 
-
+function fex.repmat(x,dims)
+    if x:dim() ~= #dims then
+        error('number of replication dims should be equal to number of dimensions of tensor')
+    end
+    local sz = torch.LongStorage(dims)
+    for i=1,sz:size() do
+        sz[i] = sz[i]*dims[i]
+    end
+    local rm = x.new():resize(sz)
+end
 
 
