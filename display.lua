@@ -16,6 +16,11 @@ function fex.imToDisplay(x,params)
         for i=1,#x do xx[i]:copy(x[i]) end
         x=xx
     end
+    if x:type() == 'torch.DoubleTensor' then
+       x=x:clone()
+    else
+       x=x:double()
+    end
     if x:dim() == 2 then
         x=torch.Tensor(x):resize(1,x:size(1),x:size(2))
     end
@@ -66,7 +71,7 @@ function fex.imshow(im,params)
     require 'qttorch'
     params = params or {}
     local title = params.title or "Image Display"
-    local xx = fex.imToDisplay(im:clone(),params)
+    local xx = fex.imToDisplay(im,params)
     local wi,hi = xx:size(xx:dim()),xx:size(xx:dim()-1)
     local ww = params.win or qtwidget.newwindow(wi,hi,title)
     local xi = params.x or 0
