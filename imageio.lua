@@ -40,7 +40,7 @@ local function readim(fname,nchannels)
     if #ss > 0 then error(s) end
     local imstor = torch.DiskFile(tmpf,'r'):binary():readByte(w*h*nchannels)
     local imtens = torch.ByteTensor(imstor):resize(h,w,nchannels):transpose(1,3):transpose(2,3)
-    local dimtens = torch.Tensor(nchannels,h,w):copy(imtens)
+    local dimtens = torch.DoubleTensor(nchannels,h,w):copy(imtens)
     dimtens:div(255)
     if nchannels == 1 then dimtens:resize(h,w) end
     return dimtens
