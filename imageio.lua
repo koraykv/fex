@@ -68,18 +68,29 @@ local function writeim(im,fname)
     if #ss > 0 then error(s) end
 end
 
-function fex.readrgb(fname)
-    return readim(fname,3)
+local function readrgb(fname)
+   return readim(fname,3)
 end
-function fex.readrgba(fname)
-    return readim(fname,4)
+local function readrgba(fname)
+   return readim(fname,4)
 end
-function fex.readgray(fname)
-    return readim(fname,1)
+local function readgray(fname)
+   return readim(fname,1)
 end
-function fex.imread(fname)
-    return readim(fname)
+function fex.imread(fname,type)
+   if not type then
+      return readim(fname)
+   end
+   if type == 'gray' then
+      return readgray(fname)
+   elseif type == 'rgb' then
+      return readrgb(fname)
+   elseif type == 'rgba' then
+      return readrgba(fname)
+   end
+   return readim(fname)
 end
+      
 function fex.imwrite(fname,im)
     local imc = im:clone()
     if imc:max() > 1 then imc:div(imc:max()) end
