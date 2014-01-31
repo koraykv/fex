@@ -190,7 +190,7 @@ function fex.dsiftfast(im, params)
     local G_X,G_Y = fex.gendgauss(sigma_edge)
     
     I:add(-I:mean())
-    print('0',torch.toc(t))
+    if fex.verbose then print('0',torch.toc(t)) end
     local I_X = torch.xcorr2(I, G_X)
     local I_Y = torch.xcorr2(I, G_Y)
 
